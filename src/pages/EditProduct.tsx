@@ -12,12 +12,15 @@ import Button from "../components/Button";
 import AdminMDXEditor from "../components/AdminMDXEditor";
 
 import Model from "../components/Model";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { fromJsonToProduct, ProductModel } from "../models/product";
 
-const AddProduct = () => {
+const EditProduct: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [product, setProduct] = useState<ProductModel | null>(null);
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState("");
   const [stock, setStock] = useState(0);
   const [selectedBrand, setSelectedBrand] = useState(-1);
@@ -45,7 +48,7 @@ const AddProduct = () => {
   const [models, setModels] = useState<
     {
       id: number;
-      title: string;
+      title: string | "";
       color: string | "";
       image: File | null;
     }[]
@@ -193,14 +196,101 @@ const AddProduct = () => {
     }
   };
 
+  const setData = async ({ product }: { product: ProductModel | null }) => {
+    if (product) {
+      setTitle(product.title);
+      setSelectedBrand(product.brand.id);
+      setSelectedSport(product.sport.id);
+      setSelectedCategories(product.categories.map((category) => category.id));
+      setSelectedGenders(product.genders.map((gender) => gender.id));
+      setPriceLBP(
+        parseFloat(
+          product.price.filter((price) => price.currency == "lbp")[0].value
+        )
+      );
+      setPriceUSD(
+        parseFloat(
+          product.price.filter((price) => price.currency == "usd")[0].value
+        )
+      );
+      setStock(product.stock);
+      setDescription(product.description);
+      setProductInfo(product.product_info);
+
+      let lastIndex = 0;
+
+      // Function to convert URL to a File
+      const urlToFile = async (url: string): Promise<File> => {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        console.log(blob);
+
+        return new File([blob], url, { type: blob.type });
+      };
+
+      const coloredImages = await Promise.all(
+        product.images.colored.map(async (colored) => {
+          const file = await urlToFile(
+            process.env.REACT_APP_BASE_URL + "uploads/" + colored.images[0]
+          );
+          lastIndex += 1;
+          return {
+            id: lastIndex,
+            title: "Colored: " + lastIndex,
+            color: colored.color,
+            image: file, // Now the image is a File object, just like uploaded ones
+          };
+        })
+      );
+
+      const genericImages = await Promise.all(
+        product.images.generic.map(async (image) => {
+          const file = await urlToFile(
+            process.env.REACT_APP_BASE_URL + "uploads/" + image
+          );
+          lastIndex += 1;
+          return {
+            id: lastIndex,
+            title: "Generic: " + lastIndex,
+            color: "",
+            image: file, // Now the image is a File object, just like uploaded ones
+          };
+        })
+      );
+
+      const getModels = [...coloredImages, ...genericImages];
+      setModels(getModels); // Set the models state with File-based images
+    }
+  };
+
   useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const response = await axios.get(
+          process.env.REACT_APP_BASE_URL + "shop/products?id=" + id
+        );
+
+        setProduct(fromJsonToProduct(response.data["data"][0]));
+      } catch {
+        return;
+      }
+    };
+    //TODO: Fetch Product Data
     fetchBrands();
     fetchSports();
     fetchCategories();
     fetchGenders();
-  }, []);
+    fetchProductData();
+  }, [id]);
 
-  const addProduct = async () => {
+  // Separate useEffect to run `setData` after `product` is updated
+  useEffect(() => {
+    if (product) {
+      setData({ product });
+    }
+  }, [product]);
+
+  const editProduct = async () => {
     try {
       const form = new FormData();
       if (title != "") {
@@ -434,9 +524,10 @@ const AddProduct = () => {
       for (const pair of form.entries()) {
         console.log(pair[0] + ": " + pair[1]);
       }
+
       if (errorList.length == 0) {
-        const response = await axios.post(
-          process.env.REACT_APP_BASE_URL + "shop/products",
+        const response = await axios.put(
+          process.env.REACT_APP_BASE_URL + "shop/products/" + id,
           form
         );
         if (response.data["success"] == true) {
@@ -617,11 +708,11 @@ const AddProduct = () => {
             <AddCircle size="h-12 w-12 mr-3" /> Add New Section
           </div>
         </div>
-          {errorList.find((error) => error.key === "product_info") && (
-            <div className="text-red-600 ">
-              {errorList.find((error) => error.key === "product_info")?.error}
-            </div>
-          )}
+        {errorList.find((error) => error.key === "product_info") && (
+          <div className="text-red-600 ">
+            {errorList.find((error) => error.key === "product_info")?.error}
+          </div>
+        )}
       </div>
       <div className="w-full mb-3">
         <div className="text-primary font-semibold text-lg mb-2">Models</div>
@@ -632,7 +723,13 @@ const AddProduct = () => {
               id={model.id}
               title={model.title}
               color={model.color}
-              img={model.image ? URL.createObjectURL(model.image) : null}
+              img={
+                model.image
+                  ? typeof model.image === "string"
+                    ? process.env.REACT_APP_BASE_URL + "uploads/" + model.image
+                    : URL.createObjectURL(model.image)
+                  : null
+              }
               onRemove={() => {
                 setModels((prev) => prev.filter((_, i) => i !== model.id - 1));
               }}
@@ -664,16 +761,16 @@ const AddProduct = () => {
           </div>
         </div>
         {errorList.find((error) => error.key === "model") && (
-            <div className="text-red-600 ">
-              {errorList.find((error) => error.key === "model")?.error}
-            </div>
-          )}
+          <div className="text-red-600 ">
+            {errorList.find((error) => error.key === "model")?.error}
+          </div>
+        )}
       </div>
       <div className="flex justify-center items-center gap-3">
         <Button
           title="Save"
           className="text-sm font-semibold"
-          onClick={addProduct}
+          onClick={() => editProduct()}
         />
         <button
           onClick={() => {}}
@@ -686,4 +783,4 @@ const AddProduct = () => {
   );
 };
 
-export default AddProduct;
+export default EditProduct;

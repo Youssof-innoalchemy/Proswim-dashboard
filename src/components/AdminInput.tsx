@@ -2,11 +2,13 @@ const AdminInput = ({
   input,
   type,
   handleChange,
+  errorText,
   label,
 }: {
   input: string;
   type?: string;
   handleChange: (s: string) => void;
+  errorText?: string
   label: string;
 }) => {
   return (
@@ -21,6 +23,7 @@ const AdminInput = ({
         }}
         className="w-full border-2 border-primary rounded-2xl py-3 px-2 text-primary font-semibold focus-visible:outline-none"
       />
+      {errorText && <div className="text-red-600 ">{errorText}</div>}
     </div>
   );
 };

@@ -7,11 +7,13 @@ const AdminSelect = ({
   options,
   selected,
   handleSelection,
+  errorText,
 }: {
   label: string;
   options: { id: number; title: string }[];
   selected: number;
   handleSelection: (id: number) => void;
+  errorText?: string;
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -55,6 +57,7 @@ const AdminSelect = ({
           ))}
         </div>
       )}
+      {errorText && <div className="text-red-600 ">{errorText}</div>}
     </div>
   );
 };

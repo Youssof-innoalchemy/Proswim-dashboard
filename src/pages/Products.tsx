@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import axios from "axios";
-import { ProductModel } from "../models";
+import { fromJsonToProduct, ProductModel } from "../models/product";
 import AddCircle from "../icons/AddCircle";
 import { useNavigate } from "react-router-dom";
 
@@ -16,13 +16,28 @@ const Products = () => {
       const response = await axios.get(
         process.env.REACT_APP_BASE_URL + "shop/products"
       );
-      console.log(response.data["data"]);
+      const productsData = response.data["data"].map((data: any) =>
+        fromJsonToProduct(data)
+      );
 
-      setProducts(response.data["data"]);
+      setProducts(productsData);
       setLoading(false);
     } catch {
       setLoading(false);
     }
+  };
+  const deleteProduct = async (id: string) => {
+    try {
+      const response = await axios.delete(
+        process.env.REACT_APP_BASE_URL + "shop/products/" + id
+      );
+
+      setProducts((prevProd) =>
+        prevProd.filter((prod) => prod.id.toString() !== id)
+      );
+
+      console.log(response);
+    } catch {}
   };
 
   useEffect(() => {
@@ -32,12 +47,12 @@ const Products = () => {
   return (
     <div className="bg-white w-full h-full px-5 py-6 rounded-lg">
       <div className="text-2xl font-semibold text-primary mb-5 flex justify-between items-center">
-        Products{" "}
+        Products
         <AddCircle
           handleClick={() => {
             navigate("/products/add");
           }}
-          size="8"
+          size="h-8 w-8"
         />
       </div>
 
@@ -49,13 +64,15 @@ const Products = () => {
             {products.map((prod) => (
               <ProductCard
                 key={prod.id}
+                id={prod.id.toString()}
                 images={prod.images}
-                brand={prod.brand}
-                title={prod.product_info[0].title}
+                brand={prod.brand.title}
+                title={prod.title}
                 price={
                   prod.price.find((p) => p.currency === "lbp")?.value ||
                   "Price not available"
                 }
+                onDelete={() => deleteProduct(prod.id.toString())}
               />
             ))}
           </div>

@@ -10,7 +10,7 @@ const Navbar = ({ links }: { links: { title: string; path: string }[] }) => {
             key={index}
             to={path}
             className={({ isActive }) =>
-              `${isActive ? "text-primary" : " text-black"}`
+              `${isActive ? "text-primary" : " text-gray-600"}`
             }
           >
             {title}

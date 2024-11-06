@@ -9,6 +9,8 @@ const Sidebar = () => {
   // Toggle function for mobile sidebar
   const toggleSidebar = () => setIsOpen(!isOpen);
 
+  
+
   return (
     <>
       <div className="hidden md:block min-w-[300px] min-h-screen fixed bg-white">
@@ -71,7 +73,7 @@ const Sidebar = () => {
           }`}
         >
           <div className="pt-10 pl-8 mb-12">
-            <img src="./logo.png" alt="Logo" />
+            <img src={logo} alt="Logo" />
           </div>
           <div className="pl-8 space-y-10">
             {navLinks.map(({ title, icon, activeIcon, path }) => (

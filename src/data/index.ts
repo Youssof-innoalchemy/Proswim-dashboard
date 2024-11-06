@@ -13,7 +13,10 @@ import activeProductsIcon from "../../public/active-product-icon.png";
 import activeClassIcon from "../../public/active-class-icon.png";
 import activeAlbumIcon from "../../public/active-album-icon.png";
 import activeSettingsIcon from "../../public/active-settings-icon.png";
-
+import { OrderModel } from "../models/order";
+import { UserModel } from "../models/user";
+import { UserEmailModel } from "../models/user_email";
+import { ScheduleCall } from "../models/schedule-call";
 export const navLinks = [
   {
     title: "Home",
@@ -60,91 +63,61 @@ export const navLinks = [
 ];
 
 export const userHeaders = [
-  { label: "User Name", data: (row) => row.name },
-  { label: "Email Address", data: (row) => row.email },
+  { label: "Email Address", data: (row: UserModel) => row.email },
+  { label: "Role", data: (row: UserModel) => row.role },
 ];
+export const userOrderHeaders = [
+  {
+    label: "Product",
+    data: (row: OrderModel) => row.products[0].product_information.title,
+  },
+  {
+    label: "Quantity",
+    data: (row: OrderModel) => row.products[0].product_quantity,
+  },
+  { label: "Address", data: (row: OrderModel) => row.address },
+  { label: "Name", data: (row: OrderModel) => row.user_id },
+];
+
 export const orderHeaders = [
-  { label: "Product", data: (row) => row.name },
-  { label: "Quantity", data: (row) => row.quantity },
-  { label: "Name", data: (row) => row.userName },
+  {
+    label: "Product",
+    data: (row: OrderModel) => row.products[0].product_information.title,
+  },
+  {
+    label: "Quantity",
+    data: (row: OrderModel) => row.products[0].product_quantity,
+  },
+  {
+    label: "Address",
+    data: (row: OrderModel) => row.address,
+  },
+  {
+    label: "Name",
+    data: (row: OrderModel) => row.user_id,
+  },
+  {
+    label: "Total Price",
+    data: (row: OrderModel) => row.total_price,
+  },
 ];
+
 export const callsHeaders = [
-  { label: "Name", data: (row) => row.name },
-  { label: "Phone Number", data: (row) => row.phone },
-  { label: "Date", data: (row) => row.date },
-  { label: "Time", data: (row) => row.time },
+  { label: "Name", data: (row: ScheduleCall) => row.name },
+  { label: "Email", data: (row: ScheduleCall) => row.email },
+  { label: "Date", data: (row: ScheduleCall) => row.date },
+  { label: "Time", data: (row: ScheduleCall) => row.time },
 ];
 
 export const emailHeaders = [
-  { label: "Subject", data: (row) => row.subject },
-  { label: "Email Address", data: (row) => row.email },
+  { label: "Subject", data: (row: UserEmailModel) => row.subject },
+  { label: "Email", data: (row: UserEmailModel) => row.email },
+  { label: "Category", data: (row: UserEmailModel) => row.category },
 ];
 
-export const userData = [
-  {
-    name: "Omar Antar",
-    email: "omar.antar@gmail.com",
-  },
-  {
-    name: "Ahmad Antar",
-    email: "ahmad.antar@gmail.com",
-  },
-  {
-    name: "Youssof Antar",
-    email: "youssof.antar@gmail.com",
-  },
-  {
-    name: "Hiba Antar",
-    email: "hiba.antar@gmail.com",
-  },
-  {
-    name: "Mohammad Antar",
-    email: "Mohammad.antar@gmail.com",
-  },
-];
-export const orderData = [
-  {
-    name: "Swimming Goggles",
-    quantity: "3",
-    userName: "Omar Antar",
-  },
-];
-export const callsData = [
-  {
-    name: "Lindsey Stroud",
-    phone: "71 344 727",
-    date: "Jun, 12 2024",
-    time: "12 PM",
-  },
-  {
-    name: "Lindsey Stroud",
-    phone: "71 344 727",
-    date: "Jun, 12 2024",
-    time: "12 PM",
-  },
-  {
-    name: "Lindsey Stroud",
-    phone: "71 344 727",
-    date: "Jun, 12 2024",
-    time: "12 PM",
-  },
-];
-
-export const emailData = [
-  {
-    subject: "Website Feedback",
-    email: "omar.antar@gmail.com",
-  },
-  {
-    subject: "Website Feedback",
-    email: "omar.antar@gmail.com",
-  },
-  {
-    subject: "Website Feedback",
-    email: "omar.antar@gmail.com",
-  },
-  {
-    subject: "Website Feedback",
-    email: "omar.antar@gmail.com",
-  },
+export const userEmailHeaders = [
+  { label: "Subject", data: (row: UserEmailModel) => row.subject },
+  { label: "Name", data: (row: UserEmailModel) => row.name },
+  { label: "Email Address", data: (row: UserEmailModel) => row.email },
+  { label: "Category", data: (row: UserEmailModel) => row.category },
 ];
